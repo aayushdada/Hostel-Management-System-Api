@@ -50,4 +50,20 @@ def post_users():
         cursor.close()
         conn.close()
     return jsonify({"message":"user inserted successfully"}),200
+
+#get user route ----------------
+@app.route("/api/users", methods=["GET"])
+def get_users():
+    conn = psycopg.connect(host=host,dbname=dbname,password=password,port=port)
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT * FROM users")
+        users=cursor.fetchall()
+    except psycopg.OperationalError:
+        return jsonify({"error":"database error"}),500
+    finally:
+        cursor.close()
+        conn.close()
+    return jsonify(users)
+
 app.run(debug=True)
