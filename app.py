@@ -69,15 +69,14 @@ def get_users():
 
 #get only one user route ---------------------
 @app.route("/api/users/<int:id>", methods=["GET"])
-def get_one_user():
+def get_one_user(id):
     conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor= conn.cursor()
     try:
-        cursor.execute("SELECT id FROM users WHERE id=?",(id,))
+        cursor.execute("SELECT * FROM users WHERE id=%s",(id,))
         existing_user=cursor.fetchone()
         if not existing_user:
             return jsonify({"message":"user does not exist"}),404
-        conn.commit()
     except psycopg.OperationalError:
         return jsonify({"error":"database error"}),500
     finally:
