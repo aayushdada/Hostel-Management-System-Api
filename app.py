@@ -54,7 +54,7 @@ def post_users():
 #get user route ----------------
 @app.route("/api/users", methods=["GET"])
 def get_users():
-    conn = psycopg.connect(host=host,dbname=dbname,password=password,port=port)
+    conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor = conn.cursor()
     try:
         cursor.execute("SELECT * FROM users")
@@ -64,6 +64,6 @@ def get_users():
     finally:
         cursor.close()
         conn.close()
-    return jsonify(users)
+    return jsonify(users),200
 
 app.run(debug=True)
