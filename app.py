@@ -42,4 +42,10 @@ def post_users():
     password= data["password"]
     role=data["role"]
     try:
-        cursor.execute
+        cursor.execute("INSERT INTO users(name,email,password,role) VALUES(?,?,?,?)",(name,email,password,role))
+        conn.commit()
+    except psycopg.OperationalError:
+        return jsonify({"error":"database error"}),500
+    finally:
+        conn.close()
+    return jsonify({"message":"user inserted successfully"}),200
