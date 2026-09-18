@@ -36,16 +36,18 @@ def post_users():
     cursor = conn.cursor()
     data= request.get_json()
     if not data.get("name") or not data.get("email") or not data.get("password") or not data.get("role"):
-        return jsonify({"message":"all fields required"}),404
+        return jsonify({"message":"all fields required"}),400
     name = data["name"]
     email = data["email"]
-    password= data["password"]
+    user_password= data["password"]
     role=data["role"]
     try:
-        cursor.execute("INSERT INTO users(name,email,password,role) VALUES(?,?,?,?)",(name,email,password,role))
+        cursor.execute("INSERT INTO users(name,email,password,role) VALUES(%s,%s,%s,%s)",(name,email,user_password,role))
         conn.commit()
     except psycopg.OperationalError:
         return jsonify({"error":"database error"}),500
     finally:
+        cursor.close()
         conn.close()
     return jsonify({"message":"user inserted successfully"}),200
+app.run(debug=True)
