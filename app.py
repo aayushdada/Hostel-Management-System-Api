@@ -258,7 +258,7 @@ def update_one_hostel(id):
     conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor=conn.cursor()
     data= request.get_json()
-    if not data.get("name") or not data.get("address") or not data.get("total_rooms"):
+    if not data.get("name") and not data.get("address") and not data.get("total_rooms"):
         return jsonify({"message":"data must must be inserted"}),400
     try:
         cursor.execute("SELECT * FROM hostels WHERE id=%s",(id,))
@@ -273,10 +273,10 @@ def update_one_hostel(id):
             cursor.execute("UPDATE hostels SET address=%s WHERE id=%s",(address,id))
         if "total_rooms" in data:
             total_rooms=data["total_rooms"]
-            cursor.execute("UPDATE hostels WHERE total_rooms=%s WHERE id=%s",(total_rooms,id))
+            cursor.execute("UPDATE hostels SET total_rooms=%s WHERE id=%s",(total_rooms,id))
         conn.commit()
     except psycopg.OperationalError:
-        return jsonify({"erro":"database error"}),500
+        return jsonify({"error":"database error"}),500
     finally:
         cursor.close()
         conn.close()
