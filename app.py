@@ -226,4 +226,34 @@ def get_one_hostel(id):
         cursor.close()
         conn.close()
     return jsonify(existing_hostel),200
-app.run(debug=True)
+
+#update(put) route
+@app.route("/api/hostels/<int:id>", methods=["PUT"])
+def update_hostel(id):
+    conn= psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
+    cursor=conn.cursor()
+    data=request.get_json()
+    if not data.get("name") or not data.get("address") or not data.get("total_rooms"):
+        return jsonify({"message":"all fields are required"}),400
+    try:
+        cursor.execute("SELECT * FROM hostels WHERE id=%s",(id,))
+        existing_hostel=cursor.fetchone()
+        if not existing_hostel:
+            return jsonify({"message":"hostel does not exist"}),404
+        if "name" in data:
+            name=data["name"]
+            cursor.execute("UPDATE hostels SET name=%s WHERE id=%s",(name,id))
+        if "address" in data:
+            address=data["address"]
+            cursor.execute("UPDATE hostels SET address=%s WHERE id=%s",(address,id))
+        if "total_rooms" in data:
+            total_rooms=data["total_rooms"]
+            cursor.execute("UPDATE hostels SET total_rooms=%s WHERE id=%s",(total_rooms,id))
+        conn.commit()
+    except psycopg.OperationalError:
+        return jsonify({"error":"database error"}),500
+    finally:
+        cursor.close()
+        conn.close()
+    return jsonify({"message":"updated successfully"}),200
+    app.run(debug=True)
