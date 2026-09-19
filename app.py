@@ -203,7 +203,6 @@ def get_hostels():
     try:
         cursor.execute("SELECT * FROM hostels")
         hostels=cursor.fetchall()
-        conn.commit()
     except psycopg.OperationalError:
         return jsonify({"error":"database error"}),500
     finally:
