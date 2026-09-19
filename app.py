@@ -31,7 +31,7 @@ def database():
                     name TEXT,
                     address TEXT,
                     total_rooms INTEGER
-                
+                )
                    """)
     conn.commit()
     print("Database connected successfully")
@@ -174,6 +174,26 @@ def delete_user(id):
 
 
 #hostels -------------------------
+#hostels post route-------------
+@app.route("/api/hostels", methods=["POST"])
+def post_hostels():
+    conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
+    cursor= conn.cursor()
+    data = request.get_json()
+    if not data.get("name") or not data.get("address") or not data.get("total_rooms"):
+        return jsonify({"message":"all fields are required"}),400
+    try:
+        name=data["name"]
+        address=["address"]
+        total_rooms=["total_rooms"]
+        cursor.execute("INSERT INTO hostels(name,address,total_rooms) VALUES(%s,%s,%s)",(name,address,total_rooms))
+        conn.commit()
+    except psycopg.OperationalError:
+        return jsonify({"error":"database error"}),500
+    finally:
+        cursor.commit()
+        conn.close()
+    return jsonify({"message":"data inserted succesfully"}),200
 
 
 app.run(debug=True)
