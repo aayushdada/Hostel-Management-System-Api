@@ -99,9 +99,9 @@ def update_user(id):
             return jsonify({"message":"user does not exist"}),404
         name = data["name"]
         email =data["email"]
-        user_password=["password"]
+        user_password=data["password"]
         role = data["role"]
-        cursor.execute("UPDATE users SET name=%s,email=%s,password=%s,role%s WHERE id=?",(name,email,password,role,id))
+        cursor.execute("UPDATE users SET name=%s,email=%s,password=%s,role=%s WHERE id=%s",(name,email,user_password,role,id))
         conn.commit()
     except psycopg.OperationalError:
         return jsonify({"error":"database error"}),500
