@@ -143,4 +143,24 @@ def patch_user(id):
         conn.close()
     return jsonify({"message":"updated successflly"}),200
 
+
+#delete user route -----------------------------------------------
+@app.route("/api/users/<int:id>", methods=["DELETE"])
+def delete_user(id):
+    conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
+    cursor= conn.cursor()
+    try:
+        cursor.execute("SELECT * FROM users WHERE id=%s",(id,))
+        existing_user=cursor.fetchone()
+        if not existing_user:
+            return jsonify({"message":"user not found"}),404
+        cursor.execute("DELETE * FROM users WHERE id=%s",(id,))
+        conn.commit()
+    except psycopg.OperationalError:
+        return jsonify({"error":"database error"}),500
+    finally:
+        cursor.close()
+        conn.close()
+    return jsonify({"message":"deleted successfully"})
+
 app.run(debug=True)
