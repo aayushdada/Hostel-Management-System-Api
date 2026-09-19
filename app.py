@@ -210,4 +210,20 @@ def get_hostels():
         conn.close()
     return jsonify(hostels),200
 
+#only one hostel get route ----------
+@app.route("/api/hostels/<int:id>", methods=["GET"])
+def get_one_hostel(id):
+    conn =psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
+    cursor=conn.cursor()
+    try:
+        cursor.execute("SELECT * FROM hostels WHERE id=%s",(id,))
+        existing_hostel=cursor.fetchone()
+        if not existing_hostel:
+            return jsonify({"message":"hostel does not exist"}),400
+    except psycopg.OperationalError:
+        return jsonify({"error":"database error"}),500
+    finally:
+        cursor.close()
+        conn.close()
+    return jsonify(existing_hostel)
 app.run(debug=True)
