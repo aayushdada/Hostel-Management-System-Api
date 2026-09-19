@@ -195,5 +195,20 @@ def post_hostels():
         conn.close()
     return jsonify({"message":"data inserted succesfully"}),200
 
+#hostel get route ---------------------
+@app.route("/api/hostels",methods=["GET"])
+def get_hostels():
+    conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
+    cursor= conn.cursor()
+    try:
+        cursor.execute("SELECT * FROM hostels")
+        hostels=cursor.fetchall()
+        conn.commit()
+    except psycopg.OperationalError:
+        return jsonify({"error":"database error"}),500
+    finally:
+        cursor.close()
+        conn.close()
+    return jsonify(hostels),200
 
 app.run(debug=True)
