@@ -219,11 +219,11 @@ def get_one_hostel(id):
         cursor.execute("SELECT * FROM hostels WHERE id=%s",(id,))
         existing_hostel=cursor.fetchone()
         if not existing_hostel:
-            return jsonify({"message":"hostel does not exist"}),400
+            return jsonify({"message":"hostel does not exist"}),404
     except psycopg.OperationalError:
         return jsonify({"error":"database error"}),500
     finally:
         cursor.close()
         conn.close()
-    return jsonify(existing_hostel)
+    return jsonify(existing_hostel),200
 app.run(debug=True)
