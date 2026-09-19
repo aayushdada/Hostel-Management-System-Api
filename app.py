@@ -33,6 +33,16 @@ def database():
                     total_rooms INTEGER
                 )
                    """)
+    cursor.execute("""
+                   CREATE TABLE IF NOT EXISTS rooms(
+                       id SERIAL PRIMARY KEY,
+                       hostel_id INTEGER REFERENCES hostels(id),
+                       room_number INTEGER,
+                       capacity INTEGER,
+                       price INTEGER,
+                       status TEXT
+                   )
+                   """)
     conn.commit()
     print("Database connected successfully")
     conn.close()
