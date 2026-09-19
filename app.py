@@ -184,14 +184,14 @@ def post_hostels():
         return jsonify({"message":"all fields are required"}),400
     try:
         name=data["name"]
-        address=["address"]
-        total_rooms=["total_rooms"]
+        address=data["address"]
+        total_rooms=data["total_rooms"]
         cursor.execute("INSERT INTO hostels(name,address,total_rooms) VALUES(%s,%s,%s)",(name,address,total_rooms))
         conn.commit()
     except psycopg.OperationalError:
         return jsonify({"error":"database error"}),500
     finally:
-        cursor.commit()
+        cursor.close()
         conn.close()
     return jsonify({"message":"data inserted succesfully"}),200
 
