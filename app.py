@@ -335,4 +335,19 @@ def post_rooms():
         cursor.close()
         conn.close()
     return jsonify({"message":"data inserted successfully"}),200
+
+#get all rooms route-------------
+@app.route("/api/rooms",methods=["GET"])
+def get_rooms():
+    conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
+    cursor=conn.cursor()
+    try:
+        cursor.execute("SELECT * FROM rooms")
+        rooms=cursor.fetchall()
+    except psycopg.OperationalError:
+        return jsonify({"error":"database error"}),500
+    finally:
+        cursor.close()
+        conn.close()
+    return jsonify(rooms)
 app.run(debug=True)
