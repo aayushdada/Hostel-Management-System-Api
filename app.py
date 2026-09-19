@@ -294,7 +294,7 @@ def delete_hostel(id):
             return jsonify({"message":"hostel does not exist"}),404
         cursor.execute("DELETE FROM hostels WHERE id=%s",(id,))
         conn.commit()
-    except psycopg.OperationalErro:
+    except psycopg.OperationalError:
         return jsonify({"error":"database error"}),500
     finally:
         cursor.close()
