@@ -327,7 +327,7 @@ def post_rooms():
         capacity=data["capacity"]
         price=data["price"]
         status=data["status"]
-        cursor.execute("INSERT INTO rooms(hostel_id,room_number,capacity,price,status) VALUES(%s,%s,%s,%s,%s) WHERE id=?",(hostel_id,room_number,capacity,price,status))
+        cursor.execute("INSERT INTO rooms(hostel_id,room_number,capacity,price,status) VALUES(%s,%s,%s,%s,%s)",(hostel_id,room_number,capacity,price,status))
         conn.commit()
     except psycopg.OperationalError:
         return jsonify({"error":"database error"}),500
