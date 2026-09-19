@@ -281,4 +281,23 @@ def update_one_hostel(id):
         cursor.close()
         conn.close()
     return jsonify({"message":"updatd successfully"}),200
+
+#delete hostel route------------------
+@app.route("/api/hostels/<int:id>", methods=["DELETE"])
+def delete_hostel(id):
+    conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
+    cursor=conn.cursor()
+    try:
+        cursor.execute("SELECT * FROM hostels WHERE id=%s",(id,))
+        existing_hostel=cursor.fetchone()
+        if not existing_hostel:
+            return jsonify({"message":"hostel does not exist"}),404
+        cursor.execute("DELETE FROM hostels WHERE id=%s",(id,))
+        conn.commit()
+    except psycopg.OperationalErro:
+        return jsonify({"error":"database error"}),500
+    finally:
+        cursor.close()
+        conn.close()
+    return jsonify({"message":"deleted successflly"}),200
 app.run(debug=True)
