@@ -154,7 +154,7 @@ def delete_user(id):
         existing_user=cursor.fetchone()
         if not existing_user:
             return jsonify({"message":"user not found"}),404
-        cursor.execute("DELETE * FROM users WHERE id=%s",(id,))
+        cursor.execute("DELETE FROM users WHERE id=%s",(id,))
         conn.commit()
     except psycopg.OperationalError:
         return jsonify({"error":"database error"}),500
