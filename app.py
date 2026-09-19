@@ -24,6 +24,15 @@ def database():
                        role TEXT
                        )
                        """)
+    cursor.execute("""
+                   CREATE TABLE IF NOT EXISTS hostels
+                (
+                    id SERIAL PRIMARY KEY,
+                    name TEXT,
+                    address TEXT,
+                    total_rooms INTEGER
+                
+                   """)
     conn.commit()
     print("Database connected successfully")
     conn.close()
@@ -162,5 +171,9 @@ def delete_user(id):
         cursor.close()
         conn.close()
     return jsonify({"message":"deleted successfully"})
+
+
+#hostels -------------------------
+
 
 app.run(debug=True)
