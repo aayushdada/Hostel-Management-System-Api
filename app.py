@@ -116,7 +116,7 @@ def patch_user(id):
     conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor = conn.cursor()
     data = request.get_json()
-    if not data.get("name") or not data.get("email") or not data.get("password") or not data.get("role"):
+    if not data.get("name") and not data.get("email") and not data.get("password") and not data.get("role"):
         return jsonify({"message":"at least one field is required"}),400
     try:
         cursor.execute("SELECT * FROM users WHERE id=%s",(id,))
