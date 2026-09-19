@@ -109,4 +109,38 @@ def update_user(id):
         cursor.close()
         conn.close()
     return jsonify({"message":"sucessfully update"}),200
+
+# patch user route -------------------------
+@app.route("/api/users/<int:id>", methods=["PATCH"])
+def patch_user(id):
+    conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
+    cursor = conn.cursor()
+    data = request.get_json()
+    if not data.get("name") or not data.get("email") or not data.get("password") or not data.get("role"):
+        return jsonify({"message":"at least one field is required"}),400
+    try:
+        cursor.execute("SELECT * FROM users WHERE id=%s",(id,))
+        existing_user=cursor.fetchone()
+        if not existing_user:
+            return jsonify({"message":"user does not exist"}),404
+        if "name" in data:
+            name = data["name"]
+            cursor.execute("UPDATE users SET name=%s WHERE id=%s",(name,id))
+        if "email" in data:
+            email = data["email"]
+            cursor.execute("UPDATE users SET email=%s WHERE id=%s",(email,id))
+        if "password" in data:
+            user_password = data["password"]
+            cursor.execute("UPDATE users SET user_password=%s WHERE id=%s",(password,id))
+        if "role" in data:
+            role = data["role"]
+            cursor.execute("UPDATE users SET role=%s WHERE id=%s",(role,id))
+        conn.commit()
+    except psycopg.OperationalError:
+        return jsonify({"error":"database error"}),500
+    finally:
+        cursor.close()
+        conn.close()
+    return jsonify({"message":"updated successflly"}),200
+
 app.run(debug=True)
