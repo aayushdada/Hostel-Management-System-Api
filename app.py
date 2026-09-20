@@ -376,12 +376,16 @@ def update_room(id):
     if not data.get("hostel_id") or not data.get("room_number") or not data.get("capacity") or not data.get("price") or not data.get("status"):
         return jsonify({"message":"all fields are required"}),400
     try:
+        cursor.execute("SELECT * FROM rooms WHERE id=%s",(id,))
+        room=cursor.fetchone()
+        if not room:
+            return jsonify({"message":"room does not exists"}),404
         hostel_id=data["hostel_id"]
         room_number=data["room_number"]
         capacity=data["capacity"]
         price=data["price"]
         status=data["status"]
-        cursor.execute("UPADTE rooms SET hostel_id=%s,room_number=%s,capacity=%s,price=%s,status=%s WHERE id=%s",(hostel_id,room_number,capacity,price,status,id))
+        cursor.execute("UPDATE rooms SET hostel_id=%s,room_number=%s,capacity=%s,price=%s,status=%s WHERE id=%s",(hostel_id,room_number,capacity,price,status,id))
         conn.commit()
     except psycopg.OperationalError:
         return jsonify({"error":"database error"}),500
