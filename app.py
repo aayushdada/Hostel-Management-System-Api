@@ -356,12 +356,11 @@ def get_one_room(id):
     conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor=conn.cursor()
     try:
-        cursor.execute("SELECT * FROM rooms WHERE id=?",(id,))
+        cursor.execute("SELECT * FROM rooms WHERE id=%s",(id,))
         room=cursor.fetchone()
         if not room:
             return jsonify({"message":"room does not exist"}),404
-        conn.commit()
-    except psycopg.OperationalErro:
+    except psycopg.OperationalError:
         return jsonify({"message":"database error"}),500
     finally:
         cursor.close()
