@@ -373,13 +373,14 @@ def update_room(id):
     conn= psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor=conn.cursor()
     data=request.get_json()
+    print(data)
     if not data.get("hostel_id") or not data.get("room_number") or not data.get("capacity") or not data.get("price") or not data.get("status"):
         return jsonify({"message":"all fields are required"}),400
     try:
         cursor.execute("SELECT * FROM rooms WHERE id=%s",(id,))
         room=cursor.fetchone()
         if not room:
-            return jsonify({"message":"room does not exists"}),404
+            return jsonify({"message":"room does not exist"}),404
         hostel_id=data["hostel_id"]
         room_number=data["room_number"]
         capacity=data["capacity"]
