@@ -350,4 +350,21 @@ def get_rooms():
         cursor.close()
         conn.close()
     return jsonify(rooms)
+#get only one room
+@app.route("/api/rooms/<int:id>", methods=["GET"])
+def get_one_room(id):
+    conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
+    cursor=conn.cursor()
+    try:
+        cursor.execute("SELECT * FROM rooms WHERE id=?",(id,))
+        room=cursor.fetchone()
+        if not room:
+            return jsonify({"message":"room does not exist"}),404
+        conn.commit()
+    except psycopg.OperationalErro:
+        return jsonify({"message":"database error"}),500
+    finally:
+        cursor.close()
+        conn.close()
+    return jsonify(room)
 app.run(debug=True)
