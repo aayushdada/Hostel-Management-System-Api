@@ -482,5 +482,18 @@ def post_bookings():
         conn.close()
     return jsonify({"message":"data inserted successfully"}),200
 
-
+#get all bookings route -----------------------
+@app.route("/api/bookings",methods=["GET"])
+def get_bookings():
+    conn=psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
+    cursor=conn.cursor()
+    try:
+        cursor.execute("SELECT * FROM bookings")
+        bookings=cursor.fetchall()
+    except psycopg.OperationalError:
+        return jsonify({"error":"database error"}),500
+    finally:
+        cursor.close()
+        conn.close()
+    return jsonify(bookings)
 app.run(debug=True)
