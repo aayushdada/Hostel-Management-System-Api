@@ -459,4 +459,28 @@ def delete_room(id):
         conn.close()
     return jsonify({"message":"Deleted successfully"}),200
 
+#bookings table--------------------------
+#post booking table-------------------
+@app.route("/api/bookings", methods=["POST"])
+def post_bookings():
+    conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
+    cursor=conn.cursor()
+    data=request.get_json()
+    if not data.get("user_id") or not data.get("room_id") or not data.get("booking_date") or not data.get("status"):
+        return jsonify({"message":"all fields required"}),400
+    try:
+        user_id=data["user_id"]
+        room_id=data["room_id"]
+        booking_date=data["booking_date"]
+        status=data["status"]
+        cursor.execute("INSERT INTO bookings(user_id,room_id,booking_date,status) VALUES(%s,%s,%s,%s)",(user_id,room_id,booking_date,status))
+        conn.commit()
+    except psycopg.OperationalError:
+        return jsonify({"error":"database error"}),500
+    finally:
+        cursor.close()
+        conn.close()
+    return jsonify({"message":"data inserted successfully"}),200
+
+
 app.run(debug=True)
