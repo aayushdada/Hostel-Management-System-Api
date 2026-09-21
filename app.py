@@ -43,6 +43,15 @@ def database():
                        status TEXT
                    )
                    """)
+    cursor.execute("""
+                   CREATE TABLE IF NOT EXISTS bookings(
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER REFERENCES users(id),
+                    room_id INTEGER REFERENCES rooms(id),
+                    booking_date DATE,
+                    status TEXT 
+                   )
+                   """)
     conn.commit()
     print("Database connected successfully")
     conn.close()
