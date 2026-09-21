@@ -475,8 +475,8 @@ def post_bookings():
         status=data["status"]
         cursor.execute("INSERT INTO bookings(user_id,room_id,booking_date,status) VALUES(%s,%s,%s,%s)",(user_id,room_id,booking_date,status))
         conn.commit()
-    except psycopg.OperationalError:
-        return jsonify({"error":"database error"}),500
+    except psycopg.IntegrityError:
+        return jsonify({"error":"user or room doesn't exist"}),500
     finally:
         cursor.close()
         conn.close()
