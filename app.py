@@ -496,4 +496,21 @@ def get_bookings():
         cursor.close()
         conn.close()
     return jsonify(bookings)
+#get one bookings
+@app.route("/api/bookings/<int:id>", methods=["GET"])
+def get_one_booking(id):
+    conn=psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
+    cursor=conn.cursor()
+    try:
+        cursor.execute("SELECT * FROM bookings WHERE id=%s",(id,))
+        booking=cursor.fetchone()
+        if not booking:
+            return jsonify({"message":"booking does not exist"}),404
+    except psycopg.OperationalError:
+        return jsonify({"error":"database error"}),500
+    finally:
+        cursor.close()
+        conn.close()
+    return jsonify(booking)
+
 app.run(debug=True)
