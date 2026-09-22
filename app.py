@@ -535,4 +535,39 @@ def update_booking(id):
         conn.close()
     return jsonify({"message":"Updated successfully"}),200
 
+#patch route -------------------
+@app.route("/api/bookings/<int:id>", methods=["PATCH"])
+def update_one(id):
+    conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
+    cursor=conn.cursor()
+    data=request.get_json()
+    if not data.get("user_id") and not data.get("room_id") and not data.get("booking_date") and not data.get("status"):
+        return jsonify({"message":"data must be inserted"}),400
+    try:
+        cursor.execute("SELECT * FROM bookings WHERE id=%s",(id,))
+        booking=cursor.fetchone()
+        if not booking:
+            return jsonify({"message":"booking does not exist"}),404
+        if "user_id" in data:
+            user_id=data["user_id"]
+            cursor.execute("UPDATE bookings SET user_id=%s WHERE id=%s",(user_id,id))
+        if "room_id" in data:
+            room_id=data["room_id"]
+            cursor.execute("UPDATE bookings  SET room_id=%s WHERE id=%s",(room_id,id))
+        if "booking_date" in data:
+            booking_date=data["booking_date"]
+            cursor.execute("UPDATE bookings SET booking_date=%s WHERE id=%s",(booking_date,id))
+        if "status" in data:
+            status=data["status"]
+            cursor.execute("UPDATE bookings  SET status=%s WHERE id=%s",(status,id))
+        conn.commit()
+    except psycopg.OperationalError:
+        return jsonify({"error":"database error"}),500
+    finally:
+        cursor.close()
+        conn.close()
+    return jsonify({"message":"updated successfully"}),200
+
+
+
 app.run(debug=True)
