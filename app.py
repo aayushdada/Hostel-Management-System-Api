@@ -473,6 +473,10 @@ def post_bookings():
         room_id=data["room_id"]
         booking_date=data["booking_date"]
         status=data["status"]
+        cursor.execute("SELECT * FROM users WHERE id=%s",(user_id,))
+        existing_user=cursor.fetchone()
+        if not existing_user:
+            return jsonify({"message":"user does not exist"}),404
         cursor.execute("INSERT INTO bookings(user_id,room_id,booking_date,status) VALUES(%s,%s,%s,%s)",(user_id,room_id,booking_date,status))
         conn.commit()
     except psycopg.IntegrityError:
