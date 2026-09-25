@@ -3,6 +3,7 @@ from flask import jsonify
 import os
 import psycopg
 from dotenv import load_dotenv
+from datetime import datetime
 load_dotenv()
 
 host =os.getenv("DB_HOST")
@@ -472,7 +473,13 @@ def post_bookings():
         user_id=data["user_id"]
         room_id=data["room_id"]
         booking_date=data["booking_date"]
+        try:
+            datetime.strptime(booking_date,"%Y-%m-%d")
+        except ValueError:
+            return jsonify({"message":"invalid date"}),400
         status=data["status"]
+        if status not in ["pending","confirmed","cancelled"]:
+            return jsonify({"message":"invalid status"}),400
         cursor.execute("SELECT * FROM users WHERE id=%s",(user_id,))
         existing_user=cursor.fetchone()
         if not existing_user:
