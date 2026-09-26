@@ -615,13 +615,13 @@ def login():
     cursor=conn.cursor()
     data=request.get_json()
     email=data["email"]
-    password=data["password"]
+    login_password=data["password"]
     try:
         cursor.execute("SELECT * FROM users WHERE email=%s",(email,))
         existing_email=cursor.fetchone()
         if not existing_email:
             return jsonify({"message":"email not found"}),400
-        if existing_email[3]!=password:
+        if existing_email[3]!=login_password:
             return jsonify({"message":"invalid password"}),400
     except psycopg.OperationalError:
         return jsonify({"error":"database error"}),500
