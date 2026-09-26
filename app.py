@@ -605,6 +605,29 @@ def delete_booking(id):
         cursor.close()
         conn.close()
     return jsonify({"message":"booking deleted successfully"}),200
-        
+
+
+
+#login route-------------------------------
+@app.route("/api/login", methods=["POST"])
+def login():
+    conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
+    cursor=conn.cursor()
+    data=request.get_json()
+    email=data["email"]
+    password=data["password"]
+    try:
+        cursor.execute("SELECT * FROM users WHERE email=%s",(email,))
+        existing_email=cursor.fetchone()
+        if not existing_email:
+            return jsonify({"message":"email not found"}),400
+        if existing_email[3]!=password:
+            return jsonify({"message":"invalid password"}),400
+    except psycopg.OperationalError:
+        return jsonify({"error":"database error"}),500
+    finally:
+        cursor.close()
+        conn.close()
+    return jsonify({"message":"logged in"}),200
 
 app.run(debug=True)
