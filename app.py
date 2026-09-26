@@ -4,6 +4,7 @@ import os
 import psycopg
 from dotenv import load_dotenv
 from datetime import datetime
+from werkzeug.security import generate_password_hash,check_password_hash
 load_dotenv()
 
 host =os.getenv("DB_HOST")
@@ -69,9 +70,10 @@ def post_users():
     name = data["name"]
     email = data["email"]
     user_password= data["password"]
+    hashed_password=generate_password_hash(user_password)
     role=data["role"]
     try:
-        cursor.execute("INSERT INTO users(name,email,password,role) VALUES(%s,%s,%s,%s)",(name,email,user_password,role))
+        cursor.execute("INSERT INTO users(name,email,password,role) VALUES(%s,%s,%s,%s)",(name,email,hashed_password,role))
         conn.commit()
     except psycopg.OperationalError:
         return jsonify({"error":"database error"}),500
@@ -621,7 +623,7 @@ def login():
         existing_email=cursor.fetchone()
         if not existing_email:
             return jsonify({"message":"email not found"}),400
-        if existing_email[3]!=login_password:
+        if not check_password_hash(existing_email[3],login_password):
             return jsonify({"message":"invalid password"}),400
     except psycopg.OperationalError:
         return jsonify({"error":"database error"}),500
