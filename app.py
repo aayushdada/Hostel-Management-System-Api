@@ -460,6 +460,8 @@ def delete_room(id):
             return jsonify({"message":"room does not exist"}),404
         cursor.execute("DELETE FROM rooms WHERE id=%s",(id,))
         conn.commit()
+    except psycopg.errors.ForeignKeyViolation:
+        return jsonify({"message":"cannot delete room because it has existing bookings"}),409
     except psycopg.OperationalError:
         return jsonify({"error":"database error"}),500
     finally:
