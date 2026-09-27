@@ -5,6 +5,7 @@ import psycopg
 from dotenv import load_dotenv
 from datetime import datetime
 from werkzeug.security import generate_password_hash,check_password_hash
+from flask_jwt_extended import JWTManager,create_access_token,jwt_required
 load_dotenv()
 
 host =os.getenv("DB_HOST")
@@ -14,6 +15,9 @@ password = os.getenv("DB_PASSWORD")
 port = os.getenv("DB_PORT")
 
 app =Flask(__name__)
+my_secret_key=os.getenv("JWT_SECRET_KEY")
+app.config["JWT_SECRET_KEY"]=my_secret_key
+jwt=JWTManager(app)
 def database():
     conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor= conn.cursor()
@@ -445,6 +449,7 @@ def update_one_field(id):
 
 #delete route------------------------------
 @app.route("/api/rooms/<int:id>", methods=["DELETE"])
+@jwt_required()
 def delete_room(id):
     conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor=conn.cursor()
@@ -625,11 +630,14 @@ def login():
             return jsonify({"message":"email not found"}),400
         if not check_password_hash(existing_email[3],login_password):
             return jsonify({"message":"invalid password"}),400
+        token=create_access_token(identity=str(existing_email[0]))
     except psycopg.OperationalError:
         return jsonify({"error":"database error"}),500
     finally:
         cursor.close()
         conn.close()
-    return jsonify({"message":"logged in"}),200
+    return jsonify({"message":"logged in","token":token}),200
+
+
 
 app.run(debug=True)
