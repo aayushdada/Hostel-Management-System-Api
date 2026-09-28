@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from datetime import datetime
 from werkzeug.security import generate_password_hash,check_password_hash
 from flask_jwt_extended import JWTManager,create_access_token,jwt_required
+from flask_jwt_extended import get_jwt_identity
 load_dotenv()
 
 host =os.getenv("DB_HOST")
@@ -451,8 +452,14 @@ def update_one_field(id):
 @app.route("/api/rooms/<int:id>", methods=["DELETE"])
 @jwt_required()
 def delete_room(id):
+    current_user=get_jwt_identity()
+    print("Logged in user:",current_user)
     conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor=conn.cursor()
+    current_user=get_jwt_identity()
+    cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
+    user_role=cursor.fetchone()
+    print("User role:",user_role)
     try:
         cursor.execute("SELECT * FROM rooms WHERE id=%s",(id,))
         room=cursor.fetchone()
@@ -620,26 +627,26 @@ def delete_booking(id):
 #login route-------------------------------
 @app.route("/api/login", methods=["POST"])
 def login():
-    conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
+    conn=psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor=conn.cursor()
     data=request.get_json()
-    email=data["email"]
-    login_password=data["password"]
     try:
-        cursor.execute("SELECT * FROM users WHERE email=%s",(email,))
-        existing_email=cursor.fetchone()
-        if not existing_email:
-            return jsonify({"message":"email not found"}),400
-        if not check_password_hash(existing_email[3],login_password):
-            return jsonify({"message":"invalid password"}),400
-        token=create_access_token(identity=str(existing_email[0]))
+        login_email=data["email"]
+        login_password=data["password"]
+        cursor.execute("SELECT * FROM users WHERE email=%s",(login_email,))
+        existing_user=cursor.fetchone()
+        if not existing_user:
+            return jsonify({"message":"user not found"}),404
+        if not check_password_hash(existing_user[3],login_password):
+            return jsonify({"message":"invalid password"}),401
     except psycopg.OperationalError:
-        return jsonify({"error":"database error"}),500
+        return jsonify({"message":"database error"}),500
     finally:
         cursor.close()
         conn.close()
-    return jsonify({"message":"logged in","token":token}),200
-
-
+    return jsonify({"message":"login successful"}),200
+        
+        
+    
 
 app.run(debug=True)
