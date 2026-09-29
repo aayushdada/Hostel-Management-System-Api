@@ -453,14 +453,14 @@ def update_one_field(id):
 @jwt_required()
 def delete_room(id):
     current_user=get_jwt_identity()
-    print("Logged in user:",current_user)
     conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor=conn.cursor()
-    current_user=get_jwt_identity()
-    cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
-    user_role=cursor.fetchone()
-    print("User role:",user_role)
     try:
+        print("logged in User:",current_user)
+        cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
+        user_role=cursor.fetchone()
+        if user_role[0] !="admin":
+            return jsonify({"message":"only admin can delete rooms"}),403
         cursor.execute("SELECT * FROM rooms WHERE id=%s",(id,))
         room=cursor.fetchone()
         if not room:
@@ -645,7 +645,8 @@ def login():
     finally:
         cursor.close()
         conn.close()
-    return jsonify({"message":"login successful","access_token":token}),200
+    return jsonify({"message":"login successful",
+                    "access_token":token}),200
         
         
     
