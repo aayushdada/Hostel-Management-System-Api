@@ -240,13 +240,20 @@ def delete_user(id):
 #hostels -------------------------
 #hostels post route-------------
 @app.route("/api/hostels", methods=["POST"])
+@jwt_required()
 def post_hostels():
+    current_user=get_jwt_identity()
     conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor= conn.cursor()
     data = request.get_json()
     if not data.get("name") or not data.get("address") or not data.get("total_rooms"):
         return jsonify({"message":"all fields are required"}),400
     try:
+        print("Logged in User:",current_user)
+        cursor.execute("SELECT roles FROM users WHERE id=%s",(current_user))
+        user_role=cursor.fetchone()
+        if user_role[0]!="admin":
+            return jsonify({"message":"only admin can post hostels"}),403
         name=data["name"]
         address=data["address"]
         total_rooms=data["total_rooms"]
@@ -293,13 +300,20 @@ def get_one_hostel(id):
 
 #update(put) route
 @app.route("/api/hostels/<int:id>", methods=["PUT"])
+@jwt_required()
 def update_hostel(id):
+    current_user=get_jwt_identity()
     conn= psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor=conn.cursor()
     data=request.get_json()
     if not data.get("name") or not data.get("address") or not data.get("total_rooms"):
         return jsonify({"message":"all fields are required"}),400
     try:
+        print("logged in user:",current_user)
+        cursor.execute("SELECT roles FROM users WHERE id=%s",(current_user,))
+        user_role=cursor.fetchone()
+        if user_role[0]!="admin":
+            return jsonify({"message":"only admin can update hostels"}),403
         cursor.execute("SELECT * FROM hostels WHERE id=%s",(id,))
         existing_hostel=cursor.fetchone()
         if not existing_hostel:
@@ -318,13 +332,20 @@ def update_hostel(id):
 
 #patch route ---------------
 @app.route("/api/hostels/<int:id>", methods=["PATCH"])
+@jwt_required()
 def update_one_hostel(id):
+    current_user=get_jwt_identity()
     conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor=conn.cursor()
     data= request.get_json()
     if not data.get("name") and not data.get("address") and not data.get("total_rooms"):
         return jsonify({"message":"data must must be inserted"}),400
     try:
+        print("Logged in User:",current_user)
+        cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
+        user_role=cursor.fetchone()
+        if user_role[0]!="admin":
+            return jsonify({"message":"only admin can update hostels details"}),403
         cursor.execute("SELECT * FROM hostels WHERE id=%s",(id,))
         existing_hostel=cursor.fetchone()
         if not existing_hostel:
@@ -348,10 +369,17 @@ def update_one_hostel(id):
 
 #delete hostel route------------------
 @app.route("/api/hostels/<int:id>", methods=["DELETE"])
+@jwt_required()
 def delete_hostel(id):
+    current_user=get_jwt_identity()
     conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor=conn.cursor()
     try:
+        print("Logged in user:",current_user)
+        cursor.execute("SELECT roles FROM users WHERE id=%s",(current_user))
+        user_role=cursor.fetchone()
+        if user_role[0]!="admin":
+            return jsonify({"message":"only admin can delete hostels"}),403
         cursor.execute("SELECT * FROM hostels WHERE id=%s",(id,))
         existing_hostel=cursor.fetchone()
         if not existing_hostel:
