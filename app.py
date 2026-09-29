@@ -136,13 +136,20 @@ def get_one_user(id):
 
 #put user route -------------------
 @app.route("/api/users/<int:id>", methods=["PUT"])
+@jwt_required()
 def update_user(id):
+    current_user=get_jwt_identity()
     conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor = conn.cursor()
     data= request.get_json()
     if not data.get("name") or not data.get("email") or not data.get("password") or not data.get("role"):
         return jsonify({"message":"all fields are required"}),400
     try:
+        print("Logged in User:",current_user)
+        cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
+        user_role=cursor.fetchone()
+        if user_role[0]!="admin":
+            return jsonify({"message":"only admin can update user details"}),403
         cursor.execute("SELECT * FROM users WHERE id=%s",(id,))
         existing_user=cursor.fetchone()
         if not existing_user:
