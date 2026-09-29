@@ -157,8 +157,9 @@ def update_user(id):
         name = data["name"]
         email =data["email"]
         user_password=data["password"]
+        hashed_password=generate_password_hash(user_password)
         role = data["role"]
-        cursor.execute("UPDATE users SET name=%s,email=%s,password=%s,role=%s WHERE id=%s",(name,email,user_password,role,id))
+        cursor.execute("UPDATE users SET name=%s,email=%s,password=%s,role=%s WHERE id=%s",(name,email,hashed_password,role,id))
         conn.commit()
     except psycopg.OperationalError:
         return jsonify({"error":"database error"}),500
@@ -194,8 +195,9 @@ def patch_user(id):
             email = data["email"]
             cursor.execute("UPDATE users SET email=%s WHERE id=%s",(email,id))
         if "password" in data:
-            user_password = data["password"]
-            cursor.execute("UPDATE users SET user_password=%s WHERE id=%s",(password,id))
+            password = data["password"]
+            hashed_password=generate_password_hash(password)
+            cursor.execute("UPDATE users SET password=%s WHERE id=%s",(hashed_password,id))
         if "role" in data:
             role = data["role"]
             cursor.execute("UPDATE users SET role=%s WHERE id=%s",(role,id))
