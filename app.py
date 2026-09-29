@@ -639,12 +639,13 @@ def login():
             return jsonify({"message":"user not found"}),404
         if not check_password_hash(existing_user[3],login_password):
             return jsonify({"message":"invalid password"}),401
+        token=create_access_token(identity=str(existing_user[0]))
     except psycopg.OperationalError:
         return jsonify({"message":"database error"}),500
     finally:
         cursor.close()
         conn.close()
-    return jsonify({"message":"login successful"}),200
+    return jsonify({"message":"login successful","access_token":token}),200
         
         
     
