@@ -222,7 +222,7 @@ def delete_user(id):
         cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
         user_role=cursor.fetchone()
         if user_role[0]!="admin":
-            return jsonify({"message":"only admin can delete user"},403)
+            return jsonify({"message":"only admin can delete user"}),403
         cursor.execute("SELECT * FROM users WHERE id=%s",(id,))
         existing_user=cursor.fetchone()
         if not existing_user:
@@ -250,7 +250,7 @@ def post_hostels():
         return jsonify({"message":"all fields are required"}),400
     try:
         print("Logged in User:",current_user)
-        cursor.execute("SELECT roles FROM users WHERE id=%s",(current_user))
+        cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
         user_role=cursor.fetchone()
         if user_role[0]!="admin":
             return jsonify({"message":"only admin can post hostels"}),403
@@ -310,7 +310,7 @@ def update_hostel(id):
         return jsonify({"message":"all fields are required"}),400
     try:
         print("logged in user:",current_user)
-        cursor.execute("SELECT roles FROM users WHERE id=%s",(current_user,))
+        cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
         user_role=cursor.fetchone()
         if user_role[0]!="admin":
             return jsonify({"message":"only admin can update hostels"}),403
@@ -376,7 +376,7 @@ def delete_hostel(id):
     cursor=conn.cursor()
     try:
         print("Logged in user:",current_user)
-        cursor.execute("SELECT roles FROM users WHERE id=%s",(current_user))
+        cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
         user_role=cursor.fetchone()
         if user_role[0]!="admin":
             return jsonify({"message":"only admin can delete hostels"}),403
@@ -406,7 +406,7 @@ def post_rooms():
     if not data.get("hostel_id") or not data.get("room_number") or not data.get("capacity") or not data.get("price") or not data.get("status"):
         return jsonify({"message":"all fields required"}),400
     try:
-        cursor.execute("SELECT roles FROM users WHERE id=%s",(current_user,))
+        cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
         user_role=cursor.fetchone()
         if user_role[0]!="admin":
             return jsonify({"message":"only admin can post rooms"}),403
@@ -467,7 +467,7 @@ def update_room(id):
     if not data.get("hostel_id") or not data.get("room_number") or not data.get("capacity") or not data.get("price") or not data.get("status"):
         return jsonify({"message":"all fields are required"}),400
     try:
-        cursor.execute("SELECT roles FROM users WHERE id=%s",(current_user,))
+        cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
         user_role=cursor.fetchone()
         if user_role[0]!="admin":
             return jsonify({"message":"only admin can update rooms"}),403
@@ -500,7 +500,7 @@ def update_one_field(id):
     if not data.get("hostel_id") and not data.get("room_number") and not  data.get("capacity") and not data.get("price") and not data.get("status"):
         return jsonify({"message":"data must be inserted"}),400
     try:
-        cursor.execute("SELECT roles FROM users WHERE id=%s",(current_user))
+        cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
         user_role=cursor.fetchone()
         if user_role[0]!="admin":
             return jsonify({"message":"only admin can update room details"}),403
@@ -571,7 +571,7 @@ def post_bookings():
     if not data.get("user_id") or not data.get("room_id") or not data.get("booking_date") or not data.get("status"):
         return jsonify({"message":"all fields required"}),400
     try:
-        cursor.execute("SELECT roles FROM users WHERE id=%s",(current_user,))
+        cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
         user_role=cursor.fetchone()
         if user_role[0]!="admin":
             return jsonify({"message":"only admin can post bookings"}),403
@@ -614,7 +614,7 @@ def get_bookings():
     conn=psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor=conn.cursor()
     try:
-        cursor.execute("SELECT roles FROM users WHERE id=%s",(current_user,))
+        cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
         user_role=cursor.fetchone()
         if user_role[0]!="admin":
             return jsonify({"message":"only admin can see the bookings"}),403
@@ -634,7 +634,7 @@ def get_one_booking(id):
     conn=psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor=conn.cursor()
     try:
-        cursor.execute("SELECT roles FROM users WHERE id=%s",(current_user,))
+        cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
         user_role=cursor.fetchone()
         if user_role[0]!="admin":
             return jsonify({"message":"only admin can see the booking"}),403
@@ -660,15 +660,19 @@ def update_booking(id):
     if not data.get("user_id") or not data.get("room_id") or not data.get("booking_date") or not data.get("status"):
         return jsonify({"message":"all fields required"}),400
     try:
-        cursor.execute("SELECT roles FROM users WHERE id=%s",(current_user,))
+        cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
         user_role=cursor.fetchone()
         if user_role[0]!="admin":
             return jsonify({"message":"only admin can update booking details"}),403
         user_id=data["user_id"]
         room_id=data["room_id"]
-        booking_date=["booking_date"]
+        booking_date=data["booking_date"]
         status=data["status"]
-        cursor.execute("UPDATE booking SET user_id=%s,room_id=%s,booking_date=%s,status=%s",(user_id,room_id,booking_date,status))
+        cursor.execute("SELECT * FROM bookings WHERE id=%s",(id,))
+        booking=cursor.fetchone()
+        if not booking:
+            return jsonify({"message":"booking does not exists"}),404
+        cursor.execute("UPDATE bookings SET user_id=%s,room_id=%s,booking_date=%s,status=%s WHERE id=%s",(user_id,room_id,booking_date,status,id))
         conn.commit()
     except psycopg.OperationalError:
         return jsonify({"error":"database error"}),500
@@ -688,7 +692,7 @@ def update_one(id):
     if not data.get("user_id") and not data.get("room_id") and not data.get("booking_date") and not data.get("status"):
         return jsonify({"message":"data must be inserted"}),400
     try:
-        cursor.execute("SELECT roles FROM users WHERE id=%",(current_user,))
+        cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
         user_role=cursor.fetchone()
         if user_role[0]!="admin":
             return jsonify({"message":"only admin can update booking details"}),403
@@ -720,9 +724,14 @@ def update_one(id):
 @app.route("/api/bookings/<int:id>", methods=["DELETE"])
 @jwt_required()
 def delete_booking(id):
+    current_user=get_jwt_identity()
     conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor=conn.cursor()
     try:
+        cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
+        user_role=cursor.fetchone()
+        if user_role[0]!="admin":
+            return jsonify({"message":"only admin can delete booking"}),403
         cursor.execute("SELECT * FROM bookings WHERE id=%s",(id,))
         booking=cursor.fetchone()
         if not booking:
