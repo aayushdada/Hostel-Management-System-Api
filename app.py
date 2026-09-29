@@ -112,11 +112,17 @@ def get_users():
 
 #get only one user route ---------------------
 @app.route("/api/users/<int:id>", methods=["GET"])
-
+@jwt_required()
 def get_one_user(id):
+    current_user=get_jwt_identity()
     conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor= conn.cursor()
     try:
+        print("Logged in User:",current_user)
+        cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
+        user_role=cursor.fetchone()
+        if user_role[0]!="admin":
+            return jsonify({"message":"only admin can see the users"}),403
         cursor.execute("SELECT * FROM users WHERE id=%s",(id,))
         existing_user=cursor.fetchone()
         if not existing_user:
