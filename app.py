@@ -562,13 +562,19 @@ def delete_room(id):
 #bookings table--------------------------
 #post booking table-------------------
 @app.route("/api/bookings", methods=["POST"])
+@jwt_required()
 def post_bookings():
+    current_user=get_jwt_identity()
     conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor=conn.cursor()
     data=request.get_json()
     if not data.get("user_id") or not data.get("room_id") or not data.get("booking_date") or not data.get("status"):
         return jsonify({"message":"all fields required"}),400
     try:
+        cursor.execute("SELECT roles FROM users WHERE id=%s",(current_user,))
+        user_role=cursor.fetchone()
+        if user_role[0]!="admin":
+            return jsonify({"message":"only admin can post bookings"}),403
         user_id=data["user_id"]
         room_id=data["room_id"]
         booking_date=data["booking_date"]
@@ -602,10 +608,16 @@ def post_bookings():
 
 #get all bookings route -----------------------
 @app.route("/api/bookings",methods=["GET"])
+@jwt_required()
 def get_bookings():
+    current_user=get_jwt_identity()
     conn=psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor=conn.cursor()
     try:
+        cursor.execute("SELECT roles FROM users WHERE id=%s",(current_user,))
+        user_role=cursor.fetchone()
+        if user_role[0]!="admin":
+            return jsonify({"message":"only admin can see the bookings"}),403
         cursor.execute("SELECT * FROM bookings")
         bookings=cursor.fetchall()
     except psycopg.OperationalError:
@@ -616,10 +628,16 @@ def get_bookings():
     return jsonify(bookings)
 #get one bookings
 @app.route("/api/bookings/<int:id>", methods=["GET"])
+@jwt_required()
 def get_one_booking(id):
+    current_user=get_jwt_identity()
     conn=psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor=conn.cursor()
     try:
+        cursor.execute("SELECT roles FROM users WHERE id=%s",(current_user,))
+        user_role=cursor.fetchone()
+        if user_role[0]!="admin":
+            return jsonify({"message":"only admin can see the booking"}),403
         cursor.execute("SELECT * FROM bookings WHERE id=%s",(id,))
         booking=cursor.fetchone()
         if not booking:
@@ -633,13 +651,19 @@ def get_one_booking(id):
 
 #update booking route --------------------------
 @app.route("/api/bookings/<int:id>",methods=["PUT"])
+@jwt_required()
 def update_booking(id):
+    current_user=get_jwt_identity()
     conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor= conn.cursor()
     data=request.get_json()
     if not data.get("user_id") or not data.get("room_id") or not data.get("booking_date") or not data.get("status"):
         return jsonify({"message":"all fields required"}),400
     try:
+        cursor.execute("SELECT roles FROM users WHERE id=%s",(current_user,))
+        user_role=cursor.fetchone()
+        if user_role[0]!="admin":
+            return jsonify({"message":"only admin can update booking details"}),403
         user_id=data["user_id"]
         room_id=data["room_id"]
         booking_date=["booking_date"]
@@ -655,13 +679,19 @@ def update_booking(id):
 
 #patch route -------------------
 @app.route("/api/bookings/<int:id>", methods=["PATCH"])
+@jwt_required()
 def update_one(id):
+    current_user=get_jwt_identity()
     conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor=conn.cursor()
     data=request.get_json()
     if not data.get("user_id") and not data.get("room_id") and not data.get("booking_date") and not data.get("status"):
         return jsonify({"message":"data must be inserted"}),400
     try:
+        cursor.execute("SELECT roles FROM users WHERE id=%",(current_user,))
+        user_role=cursor.fetchone()
+        if user_role[0]!="admin":
+            return jsonify({"message":"only admin can update booking details"}),403
         cursor.execute("SELECT * FROM bookings WHERE id=%s",(id,))
         booking=cursor.fetchone()
         if not booking:
