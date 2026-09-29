@@ -89,10 +89,17 @@ def post_users():
 
 #get user route ----------------
 @app.route("/api/users", methods=["GET"])
+@jwt_required()
 def get_users():
+    current_user=get_jwt_identity()
     conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor = conn.cursor()
     try:
+        print("Logged in User:",current_user)
+        cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
+        user_role=cursor.fetchone()
+        if user_role[0]!="admin":
+            return jsonify({"message":"only admin can see the users"}),403
         cursor.execute("SELECT * FROM users")
         users=cursor.fetchall()
     except psycopg.OperationalError:
@@ -105,6 +112,7 @@ def get_users():
 
 #get only one user route ---------------------
 @app.route("/api/users/<int:id>", methods=["GET"])
+
 def get_one_user(id):
     conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor= conn.cursor()
@@ -605,6 +613,7 @@ def update_one(id):
 
 #delete route-----------------------------------------------------------------------
 @app.route("/api/bookings/<int:id>", methods=["DELETE"])
+@jwt_required()
 def delete_booking(id):
     conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor=conn.cursor()
@@ -613,7 +622,7 @@ def delete_booking(id):
         booking=cursor.fetchone()
         if not booking:
             return jsonify({"message":"booking does not exist"}),404
-        cursor.execute("DELETE FROM bookings WHERE id=%s",(id))
+        cursor.execute("DELETE FROM bookings WHERE id=%s",(id,))
         conn.commit()
     except psycopg.OperationalError:
         return jsonify({"error":"database error"}),500
