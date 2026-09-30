@@ -702,9 +702,17 @@ def update_one(id):
             return jsonify({"message":"booking does not exist"}),404
         if "user_id" in data:
             user_id=data["user_id"]
+            cursor.execute("SELECT id FROM users WHERE id=%s",(user_id,))
+            existing_user=cursor.fetchone()
+            if not existing_user:
+                return jsonify({"message":"user does not exist"}),404
             cursor.execute("UPDATE bookings SET user_id=%s WHERE id=%s",(user_id,id))
         if "room_id" in data:
             room_id=data["room_id"]
+            cursor.execute("SELECT id FROM rooms WHERE id=%s",(room_id,))
+            existing_room=cursor.fetchone()
+            if not existing_room:
+                return jsonify({"message":"room does not exist"}),404
             cursor.execute("UPDATE bookings  SET room_id=%s WHERE id=%s",(room_id,id))
         if "booking_date" in data:
             booking_date=data["booking_date"]
