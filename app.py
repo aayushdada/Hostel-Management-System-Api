@@ -444,6 +444,8 @@ def post_rooms():
         capacity=data["capacity"]
         price=data["price"]
         status=data["status"]
+        if status not in["pending","confirmed","cancelled"]:
+            return jsonify({"message":"invalid status"}),400
         cursor.execute("INSERT INTO rooms(hostel_id,room_number,capacity,price,status) VALUES(%s,%s,%s,%s,%s)",(hostel_id,room_number,capacity,price,status))
         conn.commit()
     except psycopg.OperationalError:
@@ -509,6 +511,8 @@ def update_room(id):
         capacity=data["capacity"]
         price=data["price"]
         status=data["status"]
+        if status not in["pending","confirmed","cancelled"]:
+            return jsonify({"message":"Invalid status"}),400
         cursor.execute("UPDATE rooms SET hostel_id=%s,room_number=%s,capacity=%s,price=%s,status=%s WHERE id=%s",(hostel_id,room_number,capacity,price,status,id))
         conn.commit()
     except psycopg.OperationalError:
@@ -551,6 +555,8 @@ def update_one_field(id):
             cursor.execute("UPDATE rooms SET price=%s WHERE id=%s",(price,id))
         if "status" in data:
             status=data["status"]
+            if status not in["pending","confirmed","cancelled"]:
+                return jsonify({"message":"Invalid status"}),400
             cursor.execute("UPDATE rooms SET status=%s WHERE id=%s",(status,id))
         conn.commit()
     except psycopg.OperationalError:
@@ -697,6 +703,8 @@ def update_booking(id):
         room_id=data["room_id"]
         booking_date=data["booking_date"]
         status=data["status"]
+        if status not in["pending","confirmed","cancelled"]:
+            return jsonify({"message":"Invalid status"}),400
         cursor.execute("SELECT * FROM bookings WHERE id=%s",(id,))
         booking=cursor.fetchone()
         if not booking:
