@@ -1,1 +1,6 @@
+Flask
+pyscopg[binary]
+python-dotenv
+Werkzeug
+Flask-JWT-Extended
 gunicorn
