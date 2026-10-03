@@ -70,7 +70,7 @@ def post_users():
     conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor = conn.cursor()
     data= request.get_json()
-    if not data.get("name") or not data.get("email") or not data.get("password"):
+    if not data or not data.get("name") or not data.get("email") or not data.get("password"):
         return jsonify({"message":"all fields required"}),400
     name = data["name"]
     email = data["email"]
@@ -95,7 +95,7 @@ def create_admin():
     conn=psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor=conn.cursor()
     data=request.get_json()
-    if not data.get("name") or not data.get("email") or not data.get("password"):
+    if not data or data.get("name") or not data.get("email") or not data.get("password"):
         return jsonify({"message":"all fields required"}),400
     name=data["name"]
     email=data["email"]
