@@ -246,7 +246,7 @@ def delete_user(id):
     conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor= conn.cursor()
     try:
-        print("Logged in User:",current_user)
+       
         cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
         user_role=cursor.fetchone()
         if user_role[0]!="admin":
@@ -259,6 +259,8 @@ def delete_user(id):
         conn.commit()
     except psycopg.OperationalError:
         return jsonify({"error":"database error"}),500
+    except psycopg.IntegrityError:
+        return jsonify({"message":"cannot delete user because user has bookings"}),409
     finally:
         cursor.close()
         conn.close()
