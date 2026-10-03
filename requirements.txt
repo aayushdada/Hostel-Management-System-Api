@@ -1,5 +1,5 @@
 Flask
-pyscopg[binary]
+psycopg[binary]
 python-dotenv
 Werkzeug
 Flask-JWT-Extended
