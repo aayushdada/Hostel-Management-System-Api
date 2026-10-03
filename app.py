@@ -812,6 +812,8 @@ def login():
     conn=psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor=conn.cursor()
     data=request.get_json()
+    if not data.get("email") or not data.get("password"):
+        return jsonify({"message":"all fields required"}),400
     try:
         login_email=data["email"]
         login_password=data["password"]
