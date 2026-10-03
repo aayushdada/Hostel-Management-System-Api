@@ -76,7 +76,7 @@ def post_users():
     email = data["email"]
     user_password= data["password"]
     hashed_password=generate_password_hash(user_password)
-    role=data["role"]
+    role="student"
     try:
         cursor.execute("INSERT INTO users(name,email,password,role) VALUES(%s,%s,%s,%s)",(name,email,hashed_password,role))
         conn.commit()
@@ -86,6 +86,35 @@ def post_users():
         cursor.close()
         conn.close()
     return jsonify({"message":"user inserted successfully"}),200
+
+#admin post route----------------
+@app.route("/api/admin/users", methods=["POST"])
+@jwt_required()
+def admin():
+    current_user=get_jwt_identity()
+    conn=psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
+    cursor=conn.cursor()
+    data=request.get_json()
+    if not data.get("name") or not data.get("email") or not data.get("password"):
+        return jsonify({"message":"all fields required"}),400
+    name=data["name"]
+    email=data["email"]
+    admin_password=data["password"]
+    hashed_password=generate_password_hash(admin_password)
+    role="admin"
+    try:
+        cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
+        user_role=cursor.fetchone()
+        if  user_role[0]!="admin":
+            return jsonify({"message":"only admin can log in this route"}),403
+        cursor.execute("INSERT INTO users(name,email,password,role) VALUES(%s,%s,%s,%s)",(name,email,hashed_password,role))
+        conn.commit()
+    except psycopg.OperationalError:
+        return jsonify({"error":"database error"}),500
+    finally:
+        cursor.close()
+        conn.close()
+    return jsonify({"message":"admin inserted successfully"}),200
 
 #get user route ----------------
 @app.route("/api/users", methods=["GET"])
