@@ -90,7 +90,7 @@ def post_users():
 #admin post route----------------
 @app.route("/api/admin/users", methods=["POST"])
 @jwt_required()
-def admin():
+def create_admin():
     current_user=get_jwt_identity()
     conn=psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor=conn.cursor()
