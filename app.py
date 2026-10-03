@@ -713,12 +713,26 @@ def update_one(id):
             existing_room=cursor.fetchone()
             if not existing_room:
                 return jsonify({"message":"room does not exist"}),404
+            cursor.execute("SELECT id FROM bookings WHERE room_id=%s AND booking_date=%s AND id!=%s",(room_id,booking[3],id))
+            existing_booking=cursor.fetchone()
+            if existing_booking:
+                return jsonify({"message":"room already booked for this date"}),409
             cursor.execute("UPDATE bookings  SET room_id=%s WHERE id=%s",(room_id,id))
         if "booking_date" in data:
             booking_date=data["booking_date"]
+            try:
+                datetime.strptime(booking_date,"%Y-%m-%d")
+            except ValueError:
+                return jsonify({"message":"invalid date"}),400
+            cursor.execute("SELECT id FROM bookings WHERE room_id=%s AND booking_date=%s AND id!=%s",(booking[2],booking_date,id))
+            existing_booking=cursor.fetchone()
+            if existing_booking:
+                return jsonify({"message":"room already booked for this date"}),409
             cursor.execute("UPDATE bookings SET booking_date=%s WHERE id=%s",(booking_date,id))
         if "status" in data:
             status=data["status"]
+            if status not in ["pending","confirmed","cancelled"]:
+                return jsonify({"message":"invalid status"}),400
             cursor.execute("UPDATE bookings  SET status=%s WHERE id=%s",(status,id))
         conn.commit()
     except psycopg.OperationalError:
