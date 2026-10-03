@@ -124,12 +124,11 @@ def get_users():
     conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor = conn.cursor()
     try:
-        print("Logged in User:",current_user)
         cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
         user_role=cursor.fetchone()
         if user_role[0]!="admin":
             return jsonify({"message":"only admin can see the users"}),403
-        cursor.execute("SELECT * FROM users")
+        cursor.execute("SELECT id,name,email FROM users")
         users=cursor.fetchall()
     except psycopg.OperationalError:
         return jsonify({"error":"database error"}),500
@@ -147,12 +146,12 @@ def get_one_user(id):
     conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor= conn.cursor()
     try:
-        print("Logged in User:",current_user)
+      
         cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
         user_role=cursor.fetchone()
         if user_role[0]!="admin":
             return jsonify({"message":"only admin can see the users"}),403
-        cursor.execute("SELECT * FROM users WHERE id=%s",(id,))
+        cursor.execute("SELECT id,name,role FROM users WHERE id=%s",(id,))
         existing_user=cursor.fetchone()
         if not existing_user:
             return jsonify({"message":"user does not exist"}),404
