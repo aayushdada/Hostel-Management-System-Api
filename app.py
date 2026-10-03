@@ -224,8 +224,8 @@ def patch_user(id):
             email = data["email"]
             cursor.execute("UPDATE users SET email=%s WHERE id=%s",(email,id))
         if "password" in data:
-            password = data["password"]
-            hashed_password=generate_password_hash(password)
+            new_password = data["password"]
+            hashed_password=generate_password_hash(new_password)
             cursor.execute("UPDATE users SET password=%s WHERE id=%s",(hashed_password,id))
         if "role" in data:
             role = data["role"]
