@@ -381,12 +381,13 @@ def update_one_hostel(id):
     conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor=conn.cursor()
     data= request.get_json()
-    if not data.get("name") and not data.get("address") and not data.get("total_rooms"):
+    if not data or not data.get("name") and not data.get("address") and not data.get("total_rooms"):
         return jsonify({"message":"data must must be inserted"}),400
     try:
-        print("Logged in User:",current_user)
         cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
         user_role=cursor.fetchone()
+        if not user_role:
+            return jsonify({"message":"role does not exists"}),404
         if user_role[0]!="admin":
             return jsonify({"message":"only admin can update hostels details"}),403
         cursor.execute("SELECT * FROM hostels WHERE id=%s",(id,))
@@ -401,6 +402,8 @@ def update_one_hostel(id):
             cursor.execute("UPDATE hostels SET address=%s WHERE id=%s",(address,id))
         if "total_rooms" in data:
             total_rooms=data["total_rooms"]
+            if total_rooms<=0:
+                return jsonify({"message":"total rooms must be greater than 0"}),400
             cursor.execute("UPDATE hostels SET total_rooms=%s WHERE id=%s",(total_rooms,id))
         conn.commit()
     except psycopg.OperationalError:
