@@ -794,11 +794,13 @@ def update_one(id):
     conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor=conn.cursor()
     data=request.get_json()
-    if not data.get("user_id") and not data.get("room_id") and not data.get("booking_date") and not data.get("status"):
+    if not data or any(field in data for field in["user_id","room_id","booking_date","status"]):
         return jsonify({"message":"data must be inserted"}),400
     try:
         cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
         user_role=cursor.fetchone()
+        if not user_role:
+            return jsonify("message":"role does not exist"),404
         if user_role[0]!="admin":
             return jsonify({"message":"only admin can update booking details"}),403
         cursor.execute("SELECT * FROM bookings WHERE id=%s",(id,))
