@@ -208,10 +208,10 @@ def patch_user(id):
     conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor = conn.cursor()
     data = request.get_json()
-    if not data.get("name") and not data.get("email") and not data.get("password") and not data.get("role"):
+    if not data or not data.get("name") and not data.get("email") and not data.get("password") and not data.get("role"):
         return jsonify({"message":"at least one field is required"}),400
     try:
-        print("Logged in User:",current_user)
+        
         cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
         user_role=cursor.fetchone()
         if user_role[0]!="admin":
@@ -236,6 +236,8 @@ def patch_user(id):
         conn.commit()
     except psycopg.OperationalError:
         return jsonify({"error":"database error"}),500
+    except psycopg.IntegrityError:
+        return jsonify({"error":"email already exists"}),409
     finally:
         cursor.close()
         conn.close()
