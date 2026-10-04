@@ -569,7 +569,7 @@ def update_one_field(id):
     conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor=conn.cursor()
     data=request.get_json()
-    if not data.get("hostel_id") and not data.get("room_number") and not  data.get("capacity") and not data.get("price") and not data.get("status"):
+    if not data or not any(field in data for field in ["hostel_id","room_number","capacity","price","status"]):
         return jsonify({"message":"data must be inserted"}),400
     try:
         cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
@@ -588,17 +588,17 @@ def update_one_field(id):
         if "room_number" in data:
             room_number=data["room_number"]
             if room_number<=0:
-                return jsonify({"message":"room number must be greater than 0"})
+                return jsonify({"message":"room number must be greater than 0"}),400
             cursor.execute("UPDATE rooms SET room_number=%s WHERE id=%s",(room_number,id))
         if "capacity" in data:
             capacity=data["capacity"]
             if capacity<=0:
-                return jsonify({"message":"capacity must be greater than 0"})
+                return jsonify({"message":"capacity must be greater than 0"}),400
             cursor.execute("UPDATE rooms SET capacity=%s WHERE id=%s",(capacity,id))
         if "price" in data:
             price=data["price"]
             if price<=0:
-                return jsonify({"message":"price must be greater than 0"})
+                return jsonify({"message":"price must be greater than 0"}),400
             cursor.execute("UPDATE rooms SET price=%s WHERE id=%s",(price,id))
         if "status" in data:
             status=data["status"]
@@ -608,6 +608,8 @@ def update_one_field(id):
         conn.commit()
     except psycopg.OperationalError:
         return jsonify({"error":"database error"}),500
+    except psycopg.IntegrityError:
+        return jsonify({"message":"hostel does not exist"}),404
     finally:
         cursor.close()
         conn.close()
