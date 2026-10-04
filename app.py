@@ -703,6 +703,8 @@ def get_bookings():
     try:
         cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
         user_role=cursor.fetchone()
+        if not user_role:
+            return jsonify({"message":"role does not exist"}),404
         if user_role[0]!="admin":
             return jsonify({"message":"only admin can see the bookings"}),403
         cursor.execute("SELECT * FROM bookings")
@@ -712,7 +714,7 @@ def get_bookings():
     finally:
         cursor.close()
         conn.close()
-    return jsonify(bookings)
+    return jsonify(bookings),200
 #get one bookings
 @app.route("/api/bookings/<int:id>", methods=["GET"])
 @jwt_required()
@@ -723,6 +725,8 @@ def get_one_booking(id):
     try:
         cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
         user_role=cursor.fetchone()
+        if not user_role:
+            return jsonify({"message":"role does not exist"}),404
         if user_role[0]!="admin":
             return jsonify({"message":"only admin can see the booking"}),403
         cursor.execute("SELECT * FROM bookings WHERE id=%s",(id,))
@@ -734,7 +738,7 @@ def get_one_booking(id):
     finally:
         cursor.close()
         conn.close()
-    return jsonify(booking)
+    return jsonify(booking),200
 
 #update booking route --------------------------
 @app.route("/api/bookings/<int:id>",methods=["PUT"])
