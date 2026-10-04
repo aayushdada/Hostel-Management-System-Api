@@ -421,9 +421,10 @@ def delete_hostel(id):
     conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor=conn.cursor()
     try:
-        print("Logged in user:",current_user)
         cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
         user_role=cursor.fetchone()
+        if not user_role:
+            return jsonify({"message":"role does not exists"}),404
         if user_role[0]!="admin":
             return jsonify({"message":"only admin can delete hostels"}),403
         cursor.execute("SELECT * FROM hostels WHERE id=%s",(id,))
@@ -434,6 +435,8 @@ def delete_hostel(id):
         conn.commit()
     except psycopg.OperationalError:
         return jsonify({"error":"database error"}),500
+    except psycopg.IntegrityError:
+        return jsonify({"message":"cannot delete hostel because it has rooms"}),409
     finally:
         cursor.close()
         conn.close()
