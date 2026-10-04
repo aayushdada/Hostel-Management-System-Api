@@ -452,17 +452,25 @@ def post_rooms():
     conn= psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor=conn.cursor()
     data=request.get_json()
-    if not data.get("hostel_id") or not data.get("room_number") or not data.get("capacity") or not data.get("price") or not data.get("status"):
+    if not data or not data.get("hostel_id") or not data.get("room_number") or not data.get("capacity") or not data.get("price") or not data.get("status"):
         return jsonify({"message":"all fields required"}),400
     try:
         cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
         user_role=cursor.fetchone()
+        if not user_role:
+            return jsonify({"message":"role does not exist"}),404
         if user_role[0]!="admin":
             return jsonify({"message":"only admin can post rooms"}),403
         hostel_id=data["hostel_id"]
         room_number=data["room_number"]
+        if room_number<=0:
+            return jsonify({"message":"room number must be greater than 0"}),400
         capacity=data["capacity"]
+        if capacity<=0:
+            return jsonify({"message":"capacity must be greater than 0"}),400
         price=data["price"]
+        if price<=0:
+            return jsonify({"message":"price must be greater than 0"}),400
         status=data["status"]
         if status not in["pending","confirmed","cancelled"]:
             return jsonify({"message":"invalid status"}),400
@@ -470,6 +478,8 @@ def post_rooms():
         conn.commit()
     except psycopg.OperationalError:
         return jsonify({"error":"database error"}),500
+    except psycopg.IntegrityError:
+        return jsonify({"message":"hostel id does not exist"}),404
     finally:
         cursor.close()
         conn.close()
@@ -515,11 +525,13 @@ def update_room(id):
     cursor=conn.cursor()
     data=request.get_json()
     print(data)
-    if not data.get("hostel_id") or not data.get("room_number") or not data.get("capacity") or not data.get("price") or not data.get("status"):
+    if not data or not data.get("hostel_id") or not data.get("room_number") or not data.get("capacity") or not data.get("price") or not data.get("status"):
         return jsonify({"message":"all fields are required"}),400
     try:
         cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
         user_role=cursor.fetchone()
+        if not user_role:
+            return jsonify({"message":"role does not exist"}),404
         if user_role[0]!="admin":
             return jsonify({"message":"only admin can update rooms"}),403
         cursor.execute("SELECT * FROM rooms WHERE id=%s",(id,))
@@ -528,8 +540,14 @@ def update_room(id):
             return jsonify({"message":"room does not exist"}),404
         hostel_id=data["hostel_id"]
         room_number=data["room_number"]
+        if room_number<=0:
+            return jsonify({"message":"room number must be greater than 0"}),404
         capacity=data["capacity"]
+        if capacity<=0:
+            return jsonify({"message":"capacity must be greater than 0"})
         price=data["price"]
+        if price<=0:
+            return jsonify({"message":"price must be greater than 0"})
         status=data["status"]
         if status not in["pending","confirmed","cancelled"]:
             return jsonify({"message":"Invalid status"}),400
@@ -555,6 +573,8 @@ def update_one_field(id):
     try:
         cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
         user_role=cursor.fetchone()
+        if not user_role:
+            return jsonify({"message":"role does not exist"}),404
         if user_role[0]!="admin":
             return jsonify({"message":"only admin can update room details"}),403
         cursor.execute("SELECT * FROM rooms WHERE id=%s",(id,))
@@ -566,12 +586,18 @@ def update_one_field(id):
             cursor.execute("UPDATE rooms SET hostel_id=%s WHERE id=%s",(hostel_id,id))
         if "room_number" in data:
             room_number=data["room_number"]
+            if room_number<=0:
+                return jsonify({"message":"room number must be greater than 0"})
             cursor.execute("UPDATE rooms SET room_number=%s WHERE id=%s",(room_number,id))
         if "capacity" in data:
             capacity=data["capacity"]
+            if capacity<=0:
+                return jsonify({"message":"capacity must be greater than 0"})
             cursor.execute("UPDATE rooms SET capacity=%s WHERE id=%s",(capacity,id))
         if "price" in data:
             price=data["price"]
+            if price<=0:
+                return jsonify({"message":"price must be greater than 0"})
             cursor.execute("UPDATE rooms SET price=%s WHERE id=%s",(price,id))
         if "status" in data:
             status=data["status"]
