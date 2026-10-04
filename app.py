@@ -753,11 +753,17 @@ def update_booking(id):
     try:
         cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
         user_role=cursor.fetchone()
+        if not user_role:
+            return jsonify({"message":"role does not exist"}),404
         if user_role[0]!="admin":
             return jsonify({"message":"only admin can update booking details"}),403
         user_id=data["user_id"]
         room_id=data["room_id"]
         booking_date=data["booking_date"]
+        try:
+            datetime.strptime(booking_date, "%Y-%m-%d")
+        except ValueError:
+            return jsonify({"message":"Invalid date"}),400
         status=data["status"]
         if status not in["pending","confirmed","cancelled"]:
             return jsonify({"message":"Invalid status"}),400
@@ -765,10 +771,16 @@ def update_booking(id):
         booking=cursor.fetchone()
         if not booking:
             return jsonify({"message":"booking does not exists"}),404
+        cursor.execute("SELECT * FROM bookings WHERE room_id=%s AND booking_date=%s AND id!=%s",(room_id,booking_date,id,))
+        existing_booking=cursor.fetchone()
+        if  existing_booking:
+            return jsonify({"message":"booking already exists"}),409
         cursor.execute("UPDATE bookings SET user_id=%s,room_id=%s,booking_date=%s,status=%s WHERE id=%s",(user_id,room_id,booking_date,status,id))
         conn.commit()
     except psycopg.OperationalError:
         return jsonify({"error":"database error"}),500
+    except psycopg.IntegrityError:
+        return jsonify({"message":"room or user does not exist"}),404
     finally:
         cursor.close()
         conn.close()
