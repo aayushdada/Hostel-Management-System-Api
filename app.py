@@ -498,7 +498,7 @@ def get_rooms():
     finally:
         cursor.close()
         conn.close()
-    return jsonify(rooms)
+    return jsonify(rooms),200
 #get only one room
 @app.route("/api/rooms/<int:id>", methods=["GET"])
 def get_one_room(id):
@@ -514,7 +514,7 @@ def get_one_room(id):
     finally:
         cursor.close()
         conn.close()
-    return jsonify(room)
+    return jsonify(room),200
 
 #update room route ---------------
 @app.route("/api/rooms/<int:id>", methods=["PUT"])
@@ -524,7 +524,6 @@ def update_room(id):
     conn= psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor=conn.cursor()
     data=request.get_json()
-    print(data)
     if not data or not data.get("hostel_id") or not data.get("room_number") or not data.get("capacity") or not data.get("price") or not data.get("status"):
         return jsonify({"message":"all fields are required"}),400
     try:
@@ -541,13 +540,13 @@ def update_room(id):
         hostel_id=data["hostel_id"]
         room_number=data["room_number"]
         if room_number<=0:
-            return jsonify({"message":"room number must be greater than 0"}),404
+            return jsonify({"message":"room number must be greater than 0"}),400
         capacity=data["capacity"]
         if capacity<=0:
-            return jsonify({"message":"capacity must be greater than 0"})
+            return jsonify({"message":"capacity must be greater than 0"}),400
         price=data["price"]
         if price<=0:
-            return jsonify({"message":"price must be greater than 0"})
+            return jsonify({"message":"price must be greater than 0"}),400
         status=data["status"]
         if status not in["pending","confirmed","cancelled"]:
             return jsonify({"message":"Invalid status"}),400
@@ -555,6 +554,8 @@ def update_room(id):
         conn.commit()
     except psycopg.OperationalError:
         return jsonify({"error":"database error"}),500
+    except psycopg.IntegrityError:
+        return jsonify({"message":"hostel id does not exist"}),409
     finally:
         cursor.close()
         conn.close()
