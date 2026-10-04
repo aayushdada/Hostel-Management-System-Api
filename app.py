@@ -623,9 +623,10 @@ def delete_room(id):
     conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor=conn.cursor()
     try:
-        print("logged in User:",current_user)
         cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
         user_role=cursor.fetchone()
+        if not user_role:
+            return jsonify({"message":"role does not exist"}),404
         if user_role[0] !="admin":
             return jsonify({"message":"only admin can delete rooms"}),403
         cursor.execute("SELECT * FROM rooms WHERE id=%s",(id,))
