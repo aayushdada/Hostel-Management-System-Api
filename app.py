@@ -658,6 +658,8 @@ def post_bookings():
     try:
         cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
         user_role=cursor.fetchone()
+        if not user_role:
+            return jsonify({"message":"role does not exist"}),404
         if user_role[0]!="admin":
             return jsonify({"message":"only admin can post bookings"}),403
         user_id=data["user_id"]
@@ -685,7 +687,7 @@ def post_bookings():
         cursor.execute("INSERT INTO bookings(user_id,room_id,booking_date,status) VALUES(%s,%s,%s,%s)",(user_id,room_id,booking_date,status))
         conn.commit()
     except psycopg.IntegrityError:
-        return jsonify({"error":"user or room doesn't exist"}),500
+        return jsonify({"error":"user or room doesn't exist"}),404
     finally:
         cursor.close()
         conn.close()
