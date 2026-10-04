@@ -82,6 +82,8 @@ def post_users():
         conn.commit()
     except psycopg.OperationalError:
         return jsonify({"error":"database error"}),500
+    except psycopg.IntegrityError:
+        return jsonify({"message":"email already exists"}),409
     finally:
         cursor.close()
         conn.close()
@@ -170,10 +172,10 @@ def update_user(id):
     conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor = conn.cursor()
     data= request.get_json()
-    if not data.get("name") or not data.get("email") or not data.get("password") or not data.get("role"):
+    if not data or not data.get("name") or not data.get("email") or not data.get("password") or not data.get("role"):
         return jsonify({"message":"all fields are required"}),400
     try:
-        print("Logged in User:",current_user)
+        
         cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
         user_role=cursor.fetchone()
         if user_role[0]!="admin":
@@ -191,6 +193,8 @@ def update_user(id):
         conn.commit()
     except psycopg.OperationalError:
         return jsonify({"error":"database error"}),500
+    except psycopg.IntegrityError:
+        return jsonify({"message":"email already exists"}),409
     finally:
         cursor.close()
         conn.close()
