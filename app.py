@@ -794,13 +794,13 @@ def update_one(id):
     conn = psycopg.connect(host=host,dbname=dbname,user=user,password=password,port=port)
     cursor=conn.cursor()
     data=request.get_json()
-    if not data or any(field in data for field in["user_id","room_id","booking_date","status"]):
+    if not data or not any(field in data for field in["user_id","room_id","booking_date","status"]):
         return jsonify({"message":"data must be inserted"}),400
     try:
         cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
         user_role=cursor.fetchone()
         if not user_role:
-            return jsonify("message":"role does not exist"),404
+            return jsonify({"message":"role does not exist"}),404
         if user_role[0]!="admin":
             return jsonify({"message":"only admin can update booking details"}),403
         cursor.execute("SELECT * FROM bookings WHERE id=%s",(id,))
@@ -814,13 +814,15 @@ def update_one(id):
             if not existing_user:
                 return jsonify({"message":"user does not exist"}),404
             cursor.execute("UPDATE bookings SET user_id=%s WHERE id=%s",(user_id,id))
+        room_id=data.get("room_id",booking[2])
+        booking_date=data.get("booking_date",booking[3])
         if "room_id" in data:
             room_id=data["room_id"]
             cursor.execute("SELECT id FROM rooms WHERE id=%s",(room_id,))
             existing_room=cursor.fetchone()
             if not existing_room:
                 return jsonify({"message":"room does not exist"}),404
-            cursor.execute("SELECT id FROM bookings WHERE room_id=%s AND booking_date=%s AND id!=%s",(room_id,booking[3],id))
+            cursor.execute("SELECT id FROM bookings WHERE room_id=%s AND booking_date=%s AND id!=%s",(room_id,booking_date,id))
             existing_booking=cursor.fetchone()
             if existing_booking:
                 return jsonify({"message":"room already booked for this date"}),409
@@ -831,7 +833,7 @@ def update_one(id):
                 datetime.strptime(booking_date,"%Y-%m-%d")
             except ValueError:
                 return jsonify({"message":"invalid date"}),400
-            cursor.execute("SELECT id FROM bookings WHERE room_id=%s AND booking_date=%s AND id!=%s",(booking[2],booking_date,id))
+            cursor.execute("SELECT id FROM bookings WHERE room_id=%s AND booking_date=%s AND id!=%s",(room_id,booking_date,id))
             existing_booking=cursor.fetchone()
             if existing_booking:
                 return jsonify({"message":"room already booked for this date"}),409
