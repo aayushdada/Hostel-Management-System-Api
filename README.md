@@ -126,3 +126,15 @@ http://127.0.0.1:5000
 
 ⚠️ Keep the actual database password and JWT secret **out of GitHub**. Your `.env` should remain ignored by `.gitignore`.
 
+## Deployment
+
+The API is deployed on Render.
+
+- Backend: Render Web Service
+- Database: Render PostgreSQL
+- Server: Gunicorn
+
+Start command:
+
+```bash
+gunicorn app:app
