@@ -861,6 +861,8 @@ def delete_booking(id):
     try:
         cursor.execute("SELECT role FROM users WHERE id=%s",(current_user,))
         user_role=cursor.fetchone()
+        if not user_role:
+            return jsonify({"message":"role does not exist"}),404
         if user_role[0]!="admin":
             return jsonify({"message":"only admin can delete booking"}),403
         cursor.execute("SELECT * FROM bookings WHERE id=%s",(id,))
