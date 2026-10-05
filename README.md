@@ -91,3 +91,38 @@ This API uses JWT (JSON Web Tokens) for authentication.
 - Invalid booking dates return `400 Bad Request`.
 - Booking status must be `pending`, `confirmed`, or `cancelled`.
 - Booking management endpoints are restricted to administrators.
+
+
+## Local Setup
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/aayushdada/Hostel-Management-System-Api.git
+cd Hostel-Management-System-Api
+
+2.Create a virtual environment
+-> python -m venv venv
+#activate it on windows
+-> venv\Scripts\activate
+
+3.Install dependencies
+-> pip install -r requirements.txt
+
+4.Configure environment variables
+Create a .env file:
+DB_HOST=your_database_host
+DB_NAME=your_database_name
+DB_USER=your_database_user
+DB_PASSWORD=your_database_password
+DB_PORT=5432
+JWT_SECRET_KEY=your_secret_key
+
+5.Run the application
+-> python app.py
+the api will be availabe at:
+http://127.0.0.1:5000
+
+
+⚠️ Keep the actual database password and JWT secret **out of GitHub**. Your `.env` should remain ignored by `.gitignore`.
+
