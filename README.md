@@ -81,3 +81,13 @@ This API uses JWT (JSON Web Tokens) for authentication.
 - Role-based authorization is used to restrict admin-only operations.
 - Admin users can manage users, hostels, rooms, and bookings.
 - Unauthorized requests return appropriate HTTP status codes.
+
+## Booking Rules
+
+- A user must exist before creating a booking.
+- A room must exist before creating a booking.
+- A room cannot have multiple bookings on the same date.
+- Duplicate room bookings return `409 Conflict`.
+- Invalid booking dates return `400 Bad Request`.
+- Booking status must be `pending`, `confirmed`, or `cancelled`.
+- Booking management endpoints are restricted to administrators.
