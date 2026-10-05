@@ -138,3 +138,8 @@ Start command:
 
 ```bash
 gunicorn app:app
+
+## Links
+
+- **GitHub Repository:** https://github.com/aayushdada/Hostel-Management-System-Api
+- **Live API:** https://hostel-management-system-api-8.onrender.com
