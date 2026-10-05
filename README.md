@@ -35,14 +35,15 @@ A RESTful API for managing hostels, rooms, users, and bookings.
 
 ### Users
 
-| Method | Endpoint          | Description           |
-| ------ | ----------------- | --------------------- |
-| POST   | `/api/users`      | Register a new user   |
-| GET    | `/api/users`      | Get all users         |
-| GET    | `/api/users/<id>` | Get a specific user   |
-| PUT    | `/api/users/<id>` | Update user           |
-| PATCH  | `/api/users/<id>` | Partially update user |
-| DELETE | `/api/users/<id>` | Delete user           |
+| Method | Endpoint           | Description             |
+| ------ | ------------------ | ----------------------- |
+| POST   | `/api/users`       | Register a new user     |
+| POST   | `/api/admin/users` | Create a new admin user |
+| GET    | `/api/users`       | Get all users           |
+| GET    | `/api/users/<id>`  | Get a specific user     |
+| PUT    | `/api/users/<id>`  | Update user             |
+| PATCH  | `/api/users/<id>`  | Partially update user   |
+| DELETE | `/api/users/<id>`  | Delete user             |
 
 ### Hostels
 
@@ -169,3 +170,6 @@ gunicorn app:app
 
 * **GitHub Repository:** https://github.com/aayushdada/Hostel-Management-System-Api
 * **Live API:** https://hostel-management-system-api-8.onrender.com
+
+````
+
