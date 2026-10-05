@@ -72,3 +72,12 @@ A RESTful API for managing hostels,rooms,users and bookings
 | PUT | `/api/bookings/<id>` | Update booking |
 | PATCH | `/api/bookings/<id>` | Partially update booking |
 | DELETE | `/api/bookings/<id>` | Delete booking |
+## Authentication & Authorization
+
+This API uses JWT (JSON Web Tokens) for authentication.
+
+- Users receive a JWT access token after successful login.
+- Protected endpoints require a valid JWT token.
+- Role-based authorization is used to restrict admin-only operations.
+- Admin users can manage users, hostels, rooms, and bookings.
+- Unauthorized requests return appropriate HTTP status codes.
